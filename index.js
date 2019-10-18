@@ -1,29 +1,13 @@
-let SerialPort = require("serialport");
-var port = new SerialPort("/dev/cu.usbserial-AL00FN6X", {
-    baudRate:2400,
-    xany:false
-});
-port.on('error', function (err) {
-    console.log('Error: ', err.message);
-  })
+//let SerialPort = require("serialport");
+let IOSerial = require("./SerialIOCtrl");
 
-function sendRTS_signal(cb,timeout_ms){
-    let hdl= setTimeout(()=>{
-        port.set({rts:true},()=>{
-            cb();
-        });
-    },timeout_ms);
-    return hdl;
-}
+let path  ="/dev/cu.usbserial-AL00FN6X";
+var value = 1;
+let io  = new IOSerial(path);
+io.on('io_ready',(msg)=>{
+    setInterval(()=>{
+        value = +!value;
+        io.rts_write(value);
 
-function sendDTR_signal(cb,timeout_ms){
-    let hdl= setTimeout(()=>{
-        port.set({dtr:true},()=>{
-            cb();
-        });
-    },timeout_ms);
-    return hdl;
-
-}
-
-sendDTR_signal(()=>{},100)
+    },1000)
+})
